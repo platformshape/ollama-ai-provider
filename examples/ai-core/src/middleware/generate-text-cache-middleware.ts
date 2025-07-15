@@ -1,9 +1,6 @@
 #! /usr/bin/env -S pnpm tsx
 
-import {
-  experimental_wrapLanguageModel as wrapLanguageModel,
-  generateText,
-} from 'ai'
+import { generateText, wrapLanguageModel } from 'ai'
 import { ollama } from 'ollama-ai-provider'
 
 import { buildProgram } from '../tools/command'

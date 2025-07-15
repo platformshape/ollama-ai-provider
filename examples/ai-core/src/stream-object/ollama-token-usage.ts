@@ -28,14 +28,12 @@ async function main(model: Parameters<typeof ollama>[0]) {
 }
 
 // your custom function to record token usage:
-function recordTokenUsage({
-  completionTokens,
-  promptTokens,
-  totalTokens,
-}: LanguageModelUsage) {
-  console.log('Prompt tokens:', promptTokens)
-  console.log('Completion tokens:', completionTokens)
-  console.log('Total tokens:', totalTokens)
+function recordTokenUsage(usage: LanguageModelUsage) {
+  console.log('Input tokens:', usage.inputTokens)
+  console.log('Cached input tokens:', usage.cachedInputTokens)
+  console.log('Reasoning tokens:', usage.reasoningTokens)
+  console.log('Output tokens:', usage.outputTokens)
+  console.log('Total tokens:', usage.totalTokens)
 }
 
 buildProgram('llama3.1', main).catch(console.error)

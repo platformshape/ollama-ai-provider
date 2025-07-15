@@ -1,6 +1,6 @@
 'use client'
 
-import { useUIState } from 'ai/rsc'
+import { useUIState } from '@ai-sdk/rsc'
 import { useState } from 'react'
 
 import { AI } from '@/app/actions'

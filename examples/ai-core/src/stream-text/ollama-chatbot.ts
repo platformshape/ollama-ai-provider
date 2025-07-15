@@ -2,7 +2,7 @@
 
 import * as readline from 'node:readline/promises'
 
-import { CoreMessage, streamText, tool } from 'ai'
+import { ModelMessage, stepCountIs, streamText, tool } from 'ai'
 import { ollama } from 'ollama-ai-provider'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ const terminal = readline.createInterface({
   output: process.stdout,
 })
 
-const messages: CoreMessage[] = []
+const messages: ModelMessage[] = []
 
 async function main(model: Parameters<typeof ollama>[0]) {
   while (true) {
@@ -22,9 +22,9 @@ async function main(model: Parameters<typeof ollama>[0]) {
     messages.push({ content: userInput, role: 'user' })
 
     const result = await streamText({
-      maxSteps: 5,
       messages,
       model: ollama(model),
+      stopWhen: stepCountIs(5),
       tools: {
         weather: tool({
           description: 'Get the weather in a location',
@@ -32,7 +32,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
             location,
             temperature: 72 + Math.floor(Math.random() * 21) - 10,
           }),
-          parameters: z.object({
+          inputSchema: z.object({
             location: z
               .string()
               .describe('The location to get the weather for'),

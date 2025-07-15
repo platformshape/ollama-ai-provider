@@ -8,7 +8,6 @@ import { weatherTool } from '../tools/weather-tool'
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = await streamText({
-    experimental_toolCallStreaming: true,
     model: ollama(model),
     onChunk(chunk) {
       console.log('onChunk', chunk)
@@ -16,7 +15,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
     prompt: 'What is the weather in San Francisco?',
     tools: {
       cityAttractions: {
-        parameters: z.object({ city: z.string() }),
+        inputSchema: z.object({ city: z.string() }),
       },
       weather: weatherTool,
     },

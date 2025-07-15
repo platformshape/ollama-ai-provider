@@ -2,7 +2,7 @@
 
 import { streamText } from 'ai'
 import { ollama } from 'ollama-ai-provider'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { buildProgram } from '../tools/command'
 import { weatherTool } from '../tools/weather-tool'
@@ -13,7 +13,12 @@ async function main(model: Parameters<typeof ollama>[0]) {
     prompt: 'What is the weather in San Francisco?',
     tools: {
       cityAttractions: {
-        parameters: z.object({ city: z.string() }),
+        description: 'A tool to get top attractions in a city.',
+        execute: async ({ city }) => {
+          // Simulate fetching city attractions
+          return `Top attractions in ${city}: Golden Gate Bridge, Alcatraz Island, Fisherman's Wharf.`
+        },
+        inputSchema: z.object({ city: z.string() }),
       },
       weather: weatherTool,
     },
@@ -21,8 +26,8 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
   for await (const part of result.fullStream) {
     switch (part.type) {
-      case 'text-delta': {
-        console.log('Text delta:', part.textDelta)
+      case 'text': {
+        console.log('Text delta:', part.text)
         break
       }
 
@@ -30,13 +35,13 @@ async function main(model: Parameters<typeof ollama>[0]) {
         switch (part.toolName) {
           case 'cityAttractions': {
             console.log('TOOL CALL cityAttractions')
-            console.log(`city: ${part.args.city}`) // string
+            console.log(`city: ${part.input.city}`) // string
             break
           }
 
           case 'weather': {
             console.log('TOOL CALL weather')
-            console.log(`location: ${part.args.location}`) // string
+            console.log(`location: ${part.input.location}`) // string
             break
           }
         }
@@ -56,8 +61,8 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
           case 'weather': {
             console.log('TOOL RESULT weather')
-            console.log(`location: ${part.args.location}`) // string
-            console.log(`temperature: ${part.result.temperature}`) // number
+            console.log(`location: ${part.input.location}`) // string
+            console.log(`temperature: ${part.output.temperature}`) // number
             break
           }
         }
@@ -67,7 +72,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
       case 'finish': {
         console.log('Finish reason:', part.finishReason)
-        console.log('Usage:', part.usage)
+        console.log('Usage:', part.totalUsage)
         break
       }
 

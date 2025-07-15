@@ -1,7 +1,7 @@
 'use server'
 
+import { createStreamableValue, getMutableAIState, streamUI } from '@ai-sdk/rsc'
 import { generateId } from 'ai'
-import { createStreamableValue, getMutableAIState, streamUI } from 'ai/rsc'
 import { Loader } from 'lucide-react'
 import { ollama } from 'ollama-ai-provider'
 import OpenWeatherAPI from 'openweather-api-node'
@@ -56,7 +56,7 @@ export async function submitUserMessage(content: string): Promise<{
       name: message.name,
       role: message.role,
     })),
-    model: ollama('llama3.1', { simulateStreaming: true }),
+    model: ollama('qwen3:8b'),
     system: PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-shadow
     text: ({ content, delta, done }) => {
@@ -87,7 +87,7 @@ export async function submitUserMessage(content: string): Promise<{
     tools: {
       showWeatherInformation: {
         description: 'Show weather information',
-        generate: async function* ({ latitude, location, longitude }) {
+        generate: async function* ({ location }) {
           yield (
             <Message type="assistant">
               <Loader className="animate-spin" />
@@ -97,8 +97,8 @@ export async function submitUserMessage(content: string): Promise<{
           const openWeatherApiKey = process.env.OPENWEATHER_API_KEY ?? ''
 
           const openWeather = new OpenWeatherAPI({
-            coordinates: { lat: latitude, lon: longitude },
             key: openWeatherApiKey,
+            locationName: location,
             units: 'metric',
           })
 
@@ -108,18 +108,8 @@ export async function submitUserMessage(content: string): Promise<{
             <WeatherMessage location={location} current={current.weather} />
           )
         },
-        parameters: z.object({
-          latitude: z
-            .number()
-            .describe(
-              'Latitude of the city. You must provide this information',
-            ),
+        inputSchema: z.object({
           location: z.string().describe('Name of the city to show the weather'),
-          longitude: z
-            .number()
-            .describe(
-              'Longitude of the city. You must provide this information',
-            ),
         }),
       },
     },

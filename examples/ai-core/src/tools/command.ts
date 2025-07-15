@@ -1,11 +1,8 @@
 import { Command } from 'commander'
-import { ollama } from 'ollama-ai-provider'
 
-export async function buildProgram(
-  defaultModel:
-    | Parameters<typeof ollama.languageModel>[0]
-    | Parameters<typeof ollama.textEmbeddingModel>[0],
-  action: (model: string) => Promise<void>,
+export async function buildProgram<T extends string>(
+  defaultModel: T,
+  action: (model: T) => Promise<void>,
 ) {
   const program = new Command()
 

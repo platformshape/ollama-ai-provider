@@ -1,5 +1,5 @@
-import { EmbeddingModelV1Embedding } from '@ai-sdk/provider'
-import { JsonTestServer } from '@ai-sdk/provider-utils/test'
+import { EmbeddingModelV2Embedding } from '@ai-sdk/provider'
+import { createTestServer } from '@ai-sdk/provider-utils/test'
 
 import { createOllama } from './ollama-provider'
 
@@ -13,42 +13,58 @@ const provider = createOllama({})
 const model = provider.embedding('all-minilm')
 
 describe('doEmbed', () => {
-  const server = new JsonTestServer('http://127.0.0.1:11434/api/embed')
-
-  server.setupTestEnvironment()
+  const server: ReturnType<typeof createTestServer> = createTestServer({
+    'http://127.0.0.1:11434/api/embed': {
+      response: {
+        body: {
+          embeddings: dummyEmbeddings,
+          model: 'all-minilm',
+          prompt_eval_count: 8,
+        },
+        headers: {},
+        type: 'json-value',
+      },
+    },
+  })
 
   function prepareJsonResponse({
     embeddings = dummyEmbeddings,
     prompt_eval_count = 8,
+    responseHeaders = {},
   }: {
-    embeddings?: EmbeddingModelV1Embedding[]
+    embeddings?: EmbeddingModelV2Embedding[]
     prompt_eval_count?: number
+    responseHeaders?: Record<string, string>
   } = {}) {
-    server.responseBodyJson = {
-      embeddings,
-      model: 'all-minilm',
-      prompt_eval_count,
+    server.urls['http://127.0.0.1:11434/api/embed'].response = {
+      body: {
+        embeddings,
+        model: 'all-minilm',
+        prompt_eval_count,
+      },
+      headers: responseHeaders,
+      type: 'json-value',
     }
   }
 
   it('should extract embedding', async () => {
-    prepareJsonResponse()
-
     const { embeddings } = await model.doEmbed({ values: testValues })
 
     expect(embeddings).toStrictEqual(dummyEmbeddings)
   })
 
   it('should expose the raw response headers', async () => {
-    prepareJsonResponse()
+    prepareJsonResponse({
+      responseHeaders: {
+        'test-header': 'test-value',
+      },
+    })
 
-    server.responseHeaders = {
-      'test-header': 'test-value',
-    }
+    const rr = await model.doEmbed({
+      values: testValues,
+    })
 
-    const { rawResponse } = await model.doEmbed({ values: testValues })
-
-    expect(rawResponse?.headers).toStrictEqual({
+    expect(rr?.response?.headers).toStrictEqual({
       'content-length': '101',
       // default headers:
       'content-type': 'application/json',
@@ -59,19 +75,15 @@ describe('doEmbed', () => {
   })
 
   it('should pass the model and the values', async () => {
-    prepareJsonResponse()
-
     await model.doEmbed({ values: testValues })
 
-    expect(await server.getRequestBodyJson()).toStrictEqual({
+    expect(await server.calls.at(0)?.requestBodyJson).toStrictEqual({
       input: testValues,
       model: 'all-minilm',
     })
   })
 
   it('should pass custom headers', async () => {
-    prepareJsonResponse()
-
     const ollamaProvider = createOllama({
       headers: {
         'Custom-Header': 'test-header',
@@ -82,7 +94,7 @@ describe('doEmbed', () => {
       values: testValues,
     })
 
-    const requestHeaders = await server.getRequestHeaders()
+    const requestHeaders = await server.calls.at(0)?.requestHeaders
 
     expect(requestHeaders).toStrictEqual({
       'content-type': 'application/json',

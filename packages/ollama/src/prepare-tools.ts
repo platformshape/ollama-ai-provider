@@ -1,32 +1,14 @@
 import {
-  LanguageModelV1,
-  LanguageModelV1CallWarning,
+  LanguageModelV2,
+  LanguageModelV2CallWarning,
   UnsupportedFunctionalityError,
 } from '@ai-sdk/provider'
 
 export function prepareTools({
-  mode,
-}: {
-  mode: Parameters<LanguageModelV1['doGenerate']>[0]['mode'] & {
-    type: 'regular'
-  }
-}): {
-  tools:
-    | undefined
-    | {
-        function: {
-          description: string | undefined
-          name: string
-          parameters: unknown
-        }
-        type: 'function'
-      }[]
-  toolWarnings: LanguageModelV1CallWarning[]
-} {
-  const tools = mode.tools?.length ? mode.tools : undefined
-  const toolWarnings: LanguageModelV1CallWarning[] = []
-
-  const toolChoice = mode.toolChoice
+  toolChoice,
+  tools,
+}: Parameters<LanguageModelV2['doGenerate']>[0]) {
+  const toolWarnings: LanguageModelV2CallWarning[] = []
 
   if (tools === undefined) {
     return {
@@ -52,7 +34,7 @@ export function prepareTools({
         function: {
           description: tool.description,
           name: tool.name,
-          parameters: tool.parameters,
+          parameters: tool.inputSchema,
         },
         type: 'function',
       })
@@ -69,6 +51,7 @@ export function prepareTools({
   const type = toolChoice.type
 
   switch (type) {
+    case 'required':
     case 'auto': {
       return {
         tools: ollamaTools,
@@ -78,6 +61,18 @@ export function prepareTools({
     case 'none': {
       return {
         tools: undefined,
+        toolWarnings,
+      }
+    }
+    case 'tool': {
+      return {
+        toolChoice: {
+          function: {
+            name: toolChoice.toolName,
+          },
+          type: 'function',
+        },
+        tools: ollamaTools,
         toolWarnings,
       }
     }

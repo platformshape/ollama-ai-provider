@@ -1,18 +1,15 @@
-import {
-  EmbeddingModelV2,
-  TooManyEmbeddingValuesForCallError,
-} from '@ai-sdk/provider'
+import { ImageModelV2, UnsupportedFunctionalityError } from '@ai-sdk/provider'
 import {
   createJsonResponseHandler,
   postJsonToApi,
 } from '@ai-sdk/provider-utils'
 import { z } from 'zod'
 
-import {
-  OllamaEmbeddingModelId,
-  OllamaEmbeddingSettings,
-} from '@/ollama-embedding-settings'
 import { ollamaFailedResponseHandler } from '@/ollama-error'
+import {
+  OllamaImageModelId,
+  OllamaImageSettings,
+} from '@/ollama-image-settings'
 
 type OllamaEmbeddingConfig = {
   baseURL: string
@@ -20,19 +17,19 @@ type OllamaEmbeddingConfig = {
   headers: () => Record<string, string | undefined>
   provider: string
 }
-export class OllamaEmbeddingModel implements EmbeddingModelV2<string> {
+export class OllamaImageModel implements ImageModelV2 {
   readonly specificationVersion = 'v2'
-  readonly modelId: OllamaEmbeddingModelId
+  readonly modelId: OllamaImageModelId
 
   private readonly config: OllamaEmbeddingConfig
-  private readonly settings: OllamaEmbeddingSettings
+  private readonly settings: OllamaImageSettings
 
   get provider(): string {
     return this.config.provider
   }
 
-  get maxEmbeddingsPerCall(): number {
-    return this.settings.maxEmbeddingsPerCall ?? 2048
+  get maxImagesPerCall(): number {
+    return this.settings.maxImagesPerCall ?? 2048
   }
 
   get supportsParallelCalls(): boolean {
@@ -40,8 +37,8 @@ export class OllamaEmbeddingModel implements EmbeddingModelV2<string> {
   }
 
   constructor(
-    modelId: OllamaEmbeddingModelId,
-    settings: OllamaEmbeddingSettings,
+    modelId: OllamaImageModelId,
+    settings: OllamaImageSettings,
     config: OllamaEmbeddingConfig,
   ) {
     this.modelId = modelId
@@ -49,25 +46,23 @@ export class OllamaEmbeddingModel implements EmbeddingModelV2<string> {
     this.config = config
   }
 
-  async doEmbed({
+  async doGenerate({
     abortSignal,
-    values,
-  }: Parameters<EmbeddingModelV2<string>['doEmbed']>[0]): Promise<
-    Awaited<ReturnType<EmbeddingModelV2<string>['doEmbed']>>
+    prompt,
+  }: Parameters<ImageModelV2['doGenerate']>[0]): Promise<
+    Awaited<ReturnType<ImageModelV2['doGenerate']>>
   > {
-    if (values.length > this.maxEmbeddingsPerCall) {
-      throw new TooManyEmbeddingValuesForCallError({
-        maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
-        modelId: this.modelId,
-        provider: this.provider,
-        values,
+    if (prompt.length > this.maxImagesPerCall) {
+      throw new UnsupportedFunctionalityError({
+        functionality: 'image generation',
+        message: `Ollama image model ${this.modelId} does not support more than ${this.maxImagesPerCall} images per call.`,
       })
     }
 
     const { responseHeaders, value: response } = await postJsonToApi({
       abortSignal,
       body: {
-        input: values,
+        images,
         model: this.modelId,
       },
       failedResponseHandler: ollamaFailedResponseHandler,
@@ -81,7 +76,7 @@ export class OllamaEmbeddingModel implements EmbeddingModelV2<string> {
 
     return {
       embeddings: response.embeddings,
-      response: { headers: responseHeaders },
+      rawResponse: { headers: responseHeaders },
       usage: response.prompt_eval_count
         ? { tokens: response.prompt_eval_count }
         : undefined,

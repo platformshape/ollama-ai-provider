@@ -1,9 +1,7 @@
 import type {
-  LanguageModelV1CallOptions,
-  LanguageModelV1FinishReason,
-  LanguageModelV1FunctionTool,
-  LanguageModelV1ProviderDefinedTool,
-  LanguageModelV1StreamPart,
+  LanguageModelV2CallOptions,
+  LanguageModelV2FinishReason,
+  LanguageModelV2StreamPart,
 } from '@ai-sdk/provider'
 import { generateId } from '@ai-sdk/provider-utils'
 import { parse } from 'partial-json'
@@ -17,33 +15,18 @@ type ToolCall = {
   type: 'function'
 }
 
-export type CallModeType = LanguageModelV1CallOptions['mode']['type']
-
 export class InferToolCallsFromStream {
   private _firstMessage: boolean
   private readonly _toolCalls: ToolCall[]
-  private readonly _tools?: (
-    | LanguageModelV1FunctionTool
-    | LanguageModelV1ProviderDefinedTool
-  )[]
+  private readonly _tools?: LanguageModelV2CallOptions['tools']
   private _toolPartial: string
-  private readonly _type: CallModeType
   private _detectedToolCall: boolean
 
-  constructor({
-    tools,
-    type,
-  }: {
-    tools:
-      | (LanguageModelV1FunctionTool | LanguageModelV1ProviderDefinedTool)[]
-      | undefined
-    type: CallModeType
-  }) {
+  constructor({ tools }: { tools?: LanguageModelV2CallOptions['tools'] }) {
     this._firstMessage = true
     this._tools = tools
     this._toolPartial = ''
     this._toolCalls = []
-    this._type = type
     this._detectedToolCall = false
   }
 
@@ -59,7 +42,7 @@ export class InferToolCallsFromStream {
     controller,
     delta,
   }: {
-    controller: TransformStreamDefaultController<LanguageModelV1StreamPart>
+    controller: TransformStreamDefaultController<LanguageModelV2StreamPart>
     delta: string
   }): boolean {
     this.detectToolCall(delta)
@@ -97,11 +80,10 @@ export class InferToolCallsFromStream {
       toolCall.function.arguments = parsedArguments
 
       controller.enqueue({
-        argsTextDelta: delta,
+        input: delta,
         toolCallId: toolCall.id,
-        toolCallType: 'function',
         toolName: toolCall.function.name,
-        type: 'tool-call-delta',
+        type: 'tool-call',
       })
     }
 
@@ -111,13 +93,12 @@ export class InferToolCallsFromStream {
   finish({
     controller,
   }: {
-    controller: TransformStreamDefaultController<LanguageModelV1StreamPart>
-  }): LanguageModelV1FinishReason {
+    controller: TransformStreamDefaultController<LanguageModelV2StreamPart>
+  }): LanguageModelV2FinishReason {
     for (const toolCall of this.toolCalls) {
       controller.enqueue({
-        args: toolCall.function.arguments,
+        input: toolCall.function.arguments,
         toolCallId: toolCall.id,
-        toolCallType: 'function',
         toolName: toolCall.function.name,
         type: 'tool-call',
       })
@@ -132,12 +113,7 @@ export class InferToolCallsFromStream {
     }
 
     if (this._firstMessage) {
-      if (this._type === 'object-tool') {
-        this._detectedToolCall = true
-      } else if (
-        this._type === 'regular' &&
-        (delta.trim().startsWith('{') || delta.trim().startsWith('['))
-      ) {
+      if (delta.trim().startsWith('{') || delta.trim().startsWith('[')) {
         this._detectedToolCall = true
       }
 
@@ -145,11 +121,11 @@ export class InferToolCallsFromStream {
     }
   }
 
-  private finishReason(): LanguageModelV1FinishReason {
+  private finishReason(): LanguageModelV2FinishReason {
     if (!this.detectedToolCall) {
       return 'stop'
     }
 
-    return this._type === 'object-tool' ? 'stop' : 'tool-calls'
+    return 'tool-calls'
   }
 }

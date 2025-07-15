@@ -1,13 +1,17 @@
-import type { Experimental_LanguageModelV1Middleware as LanguageModelV1Middleware } from 'ai'
+import { LanguageModelV2Middleware } from '@ai-sdk/provider'
 
-export const yourGuardrailMiddleware: LanguageModelV1Middleware = {
+export const yourGuardrailMiddleware: LanguageModelV2Middleware = {
   wrapGenerate: async ({ doGenerate }) => {
-    const { text, ...rest } = await doGenerate()
+    const { content, ...rest } = await doGenerate()
 
     // filtering approach, e.g. for PII or other sensitive information:
-    const cleanedText = text?.replace(/badword/g, '<REDACTED>')
+    const redactedContent = content?.map((c) =>
+      c.type === 'text'
+        ? { ...c, text: c.text.replaceAll('badword', '<REDACTED>') }
+        : c,
+    )
 
-    return { text: cleanedText, ...rest }
+    return { content: redactedContent, ...rest }
   },
 
   // here you would implement the guardrail logic for streaming

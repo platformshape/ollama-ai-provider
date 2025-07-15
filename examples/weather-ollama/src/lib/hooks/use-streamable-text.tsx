@@ -1,6 +1,6 @@
 'use client'
 
-import { readStreamableValue, type StreamableValue } from 'ai/rsc'
+import { readStreamableValue, type StreamableValue } from '@ai-sdk/rsc'
 import { useEffect, useState } from 'react'
 
 export const useStreamableText = (

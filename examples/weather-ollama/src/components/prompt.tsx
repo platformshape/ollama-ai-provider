@@ -1,7 +1,7 @@
 'use client'
 
+import { useActions, useUIState } from '@ai-sdk/rsc'
 import { generateId } from 'ai'
-import { useActions, useUIState } from 'ai/rsc'
 import { FormEventHandler, ReactElement } from 'react'
 
 import { type AI } from '@/app/actions'

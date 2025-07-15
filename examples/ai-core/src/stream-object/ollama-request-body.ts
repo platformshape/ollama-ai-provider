@@ -8,7 +8,7 @@ import { buildProgram } from '../tools/command'
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = streamObject({
-    maxTokens: 2000,
+    maxOutputTokens: 2000,
     model: ollama(model, { structuredOutputs: true }),
     prompt:
       'Generate 3 character descriptions for a fantasy role playing game.',

@@ -12,9 +12,9 @@ console.log(
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = streamObject({
-    maxTokens: 2000,
+    maxOutputTokens: 2000,
     mode: 'tool',
-    model: ollama(model, { simulateStreaming: true, structuredOutputs: true }),
+    model: ollama(model, { structuredOutputs: true }),
     prompt:
       'Generate 3 character descriptions for a fantasy role playing game.',
     schema: z.object({

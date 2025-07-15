@@ -15,9 +15,9 @@
     "lint": "eslint \"./**/*.ts*\"",
     "type-check": "tsc --noEmit",
     "prettier-check": "prettier --check \"./**/*.ts*\"",
-    "test": "pnpm test:node && pnpm test:edge",
-    "test:edge": "vitest --config vitest.edge.config.js --run",
-    "test:node": "vitest --config vitest.node.config.js --run"
+    "test": "pnpm test:node --run && pnpm test:edge --run",
+    "test:edge": "vitest --config vitest.edge.config.js",
+    "test:node": "vitest --config vitest.node.config.js"
   },
   "keywords": [
     "ai",
@@ -26,8 +26,8 @@
   "author": "Sergio Gómez Bachiller <decano@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ai-sdk/provider": "^1.0.0",
-    "@ai-sdk/provider-utils": "^2.0.0",
+    "@ai-sdk/provider": "2.0.0-beta.1",
+    "@ai-sdk/provider-utils": "3.0.0-beta.2",
     "partial-json": "0.1.7"
   },
   "devDependencies": {
@@ -35,10 +35,10 @@
     "@types/node": "^18.19.56",
     "tsup": "^8.3.0",
     "typescript": "5.6.3",
-    "zod": "3.23.8"
+    "zod": "4.0.5"
   },
   "peerDependencies": {
-    "zod": "^3.0.0"
+    "zod": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {

@@ -1,12 +1,12 @@
-import { LanguageModelV1CallOptions } from 'ai'
+import { LanguageModelV2CallOptions } from '@ai-sdk/provider'
 
 export function addToLastUserMessage({
   params,
   text,
 }: {
-  params: LanguageModelV1CallOptions
+  params: LanguageModelV2CallOptions
   text: string
-}): LanguageModelV1CallOptions {
+}): LanguageModelV2CallOptions {
   const { prompt, ...rest } = params
 
   const lastMessage = prompt.at(-1)

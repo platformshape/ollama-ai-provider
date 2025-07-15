@@ -1,5 +1,5 @@
 import {
-  LanguageModelV1Prompt,
+  LanguageModelV2Prompt,
   UnsupportedFunctionalityError,
 } from '@ai-sdk/provider'
 import { convertUint8ArrayToBase64 } from '@ai-sdk/provider-utils'
@@ -7,7 +7,7 @@ import { convertUint8ArrayToBase64 } from '@ai-sdk/provider-utils'
 import { OllamaChatPrompt } from '@/ollama-chat-prompt'
 
 export function convertToOllamaChatMessages(
-  prompt: LanguageModelV1Prompt,
+  prompt: LanguageModelV2Prompt,
 ): OllamaChatPrompt {
   const messages: OllamaChatPrompt = []
 
@@ -25,18 +25,27 @@ export function convertToOllamaChatMessages(
               if (current.type === 'text') {
                 previous.content += current.text
               } else if (
-                current.type === 'image' &&
-                current.image instanceof URL
+                current.type === 'file' &&
+                current.mediaType.startsWith('image/') &&
+                current.data instanceof URL
               ) {
                 throw new UnsupportedFunctionalityError({
                   functionality: 'Image URLs in user messages',
                 })
               } else if (
-                current.type === 'image' &&
-                current.image instanceof Uint8Array
+                current.type === 'file' &&
+                current.mediaType.startsWith('image/') &&
+                typeof current.data === 'string'
               ) {
                 previous.images = previous.images || []
-                previous.images.push(convertUint8ArrayToBase64(current.image))
+                previous.images.push(current.data)
+              } else if (
+                current.type === 'file' &&
+                current.mediaType.startsWith('image/') &&
+                current.data instanceof Uint8Array
+              ) {
+                previous.images = previous.images || []
+                previous.images.push(convertUint8ArrayToBase64(current.data))
               }
 
               return previous

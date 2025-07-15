@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {},
   "dependencies": {
-    "@opentelemetry/sdk-node": "0.54.2",
+    "@ai-sdk/provider": "2.0.0-beta.1",
     "@opentelemetry/auto-instrumentations-node": "0.47.0",
+    "@opentelemetry/sdk-node": "0.54.2",
     "@opentelemetry/sdk-trace-node": "1.27.0",
-    "ai": "^4.0.0",
+    "ai": "5.0.0-beta.18",
     "commander": "^12.1.0",
     "mathjs": "12.4.2",
     "ollama-ai-provider": "workspace:latest",
-    "zod": "3.23.8",
+    "zod": "4.0.5",
     "zod-to-json-schema": "3.23.2"
   },
   "devDependencies": {

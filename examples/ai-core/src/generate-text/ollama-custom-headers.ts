@@ -21,7 +21,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
     headers: {
       'custom-request-header': 'value-2',
     },
-    maxTokens: 50,
+    maxOutputTokens: 50,
     model: ollama(model),
     prompt: 'Invent a new holiday and describe its traditions.',
   })

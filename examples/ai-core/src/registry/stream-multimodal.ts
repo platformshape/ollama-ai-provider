@@ -3,14 +3,13 @@
 import fs from 'node:fs'
 
 import { streamText } from 'ai'
-import { ollama } from 'ollama-ai-provider'
 
 import { buildProgram } from '../tools/command'
 import { registry } from './setup-registry'
 
-async function main(model: Parameters<typeof ollama>[0]) {
+async function main(model: Parameters<typeof registry.languageModel>[0]) {
   const result = await streamText({
-    maxTokens: 512,
+    maxOutputTokens: 512,
     messages: [
       {
         content: [

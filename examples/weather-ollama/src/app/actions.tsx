@@ -1,12 +1,12 @@
 'use server'
 
-import { CoreMessage, generateId } from 'ai'
-import { createAI } from 'ai/rsc'
+import { createAI } from '@ai-sdk/rsc'
+import { generateId, ModelMessage } from 'ai'
 import { ReactNode } from 'react'
 
 import { submitUserMessage } from '@/lib/ai/actions'
 
-export type Message = CoreMessage & {
+export type Message = ModelMessage & {
   id: string
 }
 

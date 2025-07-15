@@ -279,14 +279,6 @@ export interface OllamaChatSettings {
   repeatPenalty?: number
 
   /**
-   Simulates streaming by using a normal generate call and returning it as a stream.
-   Enable this if the model that you are using does not support streaming.
-
-   Defaults to `false`.
-   */
-  simulateStreaming?: boolean
-
-  /**
    * Whether to use structured outputs. Defaults to false.
    *
    * When enabled, tool calls and object generation will be strict and follow the provided schema.

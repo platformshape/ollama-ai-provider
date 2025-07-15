@@ -7,7 +7,7 @@ import { buildProgram } from '../tools/command'
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = await streamText({
-    maxTokens: 1024,
+    maxOutputTokens: 1024,
     model: ollama(model),
     prompt: 'Invent a new holiday and describe its traditions.',
     temperature: 0.3,

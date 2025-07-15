@@ -9,7 +9,7 @@ import { weatherTool } from '../tools/weather-tool'
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = await generateText({
-    maxTokens: 512,
+    maxOutputTokens: 512,
     model: ollama(model),
     prompt:
       'What is the weather in San Francisco and what attractions should I visit?',
@@ -19,7 +19,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
     },
     tools: {
       cityAttractions: tool({
-        parameters: z.object({ city: z.string() }),
+        inputSchema: z.object({ city: z.string() }),
       }),
       weather: weatherTool,
     },

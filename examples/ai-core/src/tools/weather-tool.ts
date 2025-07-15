@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 export const weatherTool = {
   description: 'Get the weather in a location',
@@ -6,7 +6,7 @@ export const weatherTool = {
     location,
     temperature: 72 + Math.floor(Math.random() * 21) - 10,
   }),
-  parameters: z.object({
+  inputSchema: z.object({
     location: z.string().describe('The location to get the weather for'),
   }),
 }

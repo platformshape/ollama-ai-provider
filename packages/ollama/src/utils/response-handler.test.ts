@@ -21,9 +21,12 @@ describe('createJsonStreamResponseHandler', () => {
       url: 'some url',
     })
 
-    expect(await convertReadableStreamToArray(stream)).toStrictEqual([
-      { success: true, value: { a: 1 } },
-      { success: true, value: { a: 2 } },
+    const streamArray = await Promise.all(
+      await convertReadableStreamToArray(stream),
+    )
+    expect(streamArray).toStrictEqual([
+      { rawValue: { a: 1 }, success: true, value: { a: 1 } },
+      { rawValue: { a: 2 }, success: true, value: { a: 2 } },
     ])
   })
 
@@ -41,8 +44,11 @@ describe('createJsonStreamResponseHandler', () => {
       url: 'some url',
     })
 
-    expect(await convertReadableStreamToArray(stream)).toStrictEqual([
-      { success: true, value: { a: 1 } },
+    const streamArray = await Promise.all(
+      await convertReadableStreamToArray(stream),
+    )
+    expect(streamArray).toStrictEqual([
+      { rawValue: { a: 1 }, success: true, value: { a: 1 } },
     ])
   })
 
@@ -62,11 +68,14 @@ describe('createJsonStreamResponseHandler', () => {
       url: 'some url',
     })
 
-    expect(await convertReadableStreamToArray(stream)).toStrictEqual([
-      { success: true, value: { a: 1 } },
-      { success: true, value: { a: 2 } },
-      { success: true, value: { a: 3 } },
-      { success: true, value: { a: 4 } },
+    const streamArray = await Promise.all(
+      await convertReadableStreamToArray(stream),
+    )
+    expect(streamArray).toStrictEqual([
+      { rawValue: { a: 1 }, success: true, value: { a: 1 } },
+      { rawValue: { a: 2 }, success: true, value: { a: 2 } },
+      { rawValue: { a: 3 }, success: true, value: { a: 3 } },
+      { rawValue: { a: 4 }, success: true, value: { a: 4 } },
     ])
   })
 })

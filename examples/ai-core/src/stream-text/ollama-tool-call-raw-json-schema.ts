@@ -11,7 +11,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
     prompt: 'What is the weather in San Francisco?',
     tools: {
       cityAttractions: tool({
-        parameters: jsonSchema<{ city: string }>({
+        inputSchema: jsonSchema<{ city: string }>({
           properties: {
             city: { type: 'string' },
           },
@@ -26,7 +26,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
           location,
           temperature: 72 + Math.floor(Math.random() * 21) - 10,
         }),
-        parameters: jsonSchema<{ location: string }>({
+        inputSchema: jsonSchema<{ location: string }>({
           properties: {
             location: { type: 'string' },
           },
@@ -39,8 +39,8 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
   for await (const part of result.fullStream) {
     switch (part.type) {
-      case 'text-delta': {
-        console.log('Text delta:', part.textDelta)
+      case 'text': {
+        console.log('Text delta:', part.text)
         break
       }
 
@@ -48,13 +48,13 @@ async function main(model: Parameters<typeof ollama>[0]) {
         switch (part.toolName) {
           case 'cityAttractions': {
             console.log('TOOL CALL cityAttractions')
-            console.log(`city: ${part.args.city}`) // string
+            console.log(`city: ${part.input.city}`) // string
             break
           }
 
           case 'weather': {
             console.log('TOOL CALL weather')
-            console.log(`location: ${part.args.location}`) // string
+            console.log(`location: ${part.input.location}`) // string
             break
           }
         }
@@ -74,8 +74,8 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
           case 'weather': {
             console.log('TOOL RESULT weather')
-            console.log(`location: ${part.args.location}`) // string
-            console.log(`temperature: ${part.result.temperature}`) // number
+            console.log(`location: ${part.input.location}`) // string
+            console.log(`temperature: ${part.output.temperature}`) // number
             break
           }
         }
@@ -85,7 +85,7 @@ async function main(model: Parameters<typeof ollama>[0]) {
 
       case 'finish': {
         console.log('Finish reason:', part.finishReason)
-        console.log('Usage:', part.usage)
+        console.log('Usage:', part.totalUsage)
         break
       }
 

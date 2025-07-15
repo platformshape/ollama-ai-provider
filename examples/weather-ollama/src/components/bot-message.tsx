@@ -1,6 +1,6 @@
 'use client'
 
-import { StreamableValue } from 'ai/rsc'
+import { StreamableValue } from '@ai-sdk/rsc'
 
 import { Message } from '@/components/message'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'

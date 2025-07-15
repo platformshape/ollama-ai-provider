@@ -1,4 +1,4 @@
-import { EmbeddingModelV1, LanguageModelV1, ProviderV1 } from '@ai-sdk/provider'
+import { EmbeddingModelV2, LanguageModelV2, ProviderV2 } from '@ai-sdk/provider'
 import { withoutTrailingSlash } from '@ai-sdk/provider-utils'
 
 import { OllamaChatLanguageModel } from '@/ollama-chat-language-model'
@@ -8,29 +8,34 @@ import {
   OllamaEmbeddingModelId,
   OllamaEmbeddingSettings,
 } from '@/ollama-embedding-settings'
+import { OllamaImageModel } from '@/ollama-image-model'
+import {
+  OllamaImageModelId,
+  OllamaImageSettings,
+} from '@/ollama-image-settings'
 
-export interface OllamaProvider extends ProviderV1 {
-  (modelId: OllamaChatModelId, settings?: OllamaChatSettings): LanguageModelV1
+export interface OllamaProvider extends ProviderV2 {
+  (modelId: OllamaChatModelId, settings?: OllamaChatSettings): LanguageModelV2
 
   chat(
     modelId: OllamaChatModelId,
     settings?: OllamaChatSettings,
-  ): LanguageModelV1
+  ): LanguageModelV2
 
   embedding(
     modelId: OllamaEmbeddingModelId,
     settings?: OllamaEmbeddingSettings,
-  ): EmbeddingModelV1<string>
+  ): EmbeddingModelV2<string>
 
   languageModel(
     modelId: OllamaChatModelId,
     settings?: OllamaChatSettings,
-  ): LanguageModelV1
+  ): LanguageModelV2
 
   textEmbeddingModel(
     modelId: OllamaEmbeddingModelId,
     settings?: OllamaEmbeddingSettings,
-  ): EmbeddingModelV1<string>
+  ): EmbeddingModelV2<string>
 }
 
 export interface OllamaProviderSettings {
@@ -74,6 +79,17 @@ export function createOllama(
       provider: 'ollama.chat',
     })
 
+  const createImageModel = (
+    modelId: OllamaImageModelId,
+    settings: OllamaImageSettings = {},
+  ) =>
+    new OllamaImageModel(modelId, settings, {
+      baseURL,
+      fetch: options.fetch,
+      headers: getHeaders,
+      provider: 'ollama.image',
+    })
+
   const createEmbeddingModel = (
     modelId: OllamaEmbeddingModelId,
     settings: OllamaEmbeddingSettings = {},
@@ -103,6 +119,7 @@ export function createOllama(
   provider.languageModel = createChatModel
   provider.textEmbedding = createEmbeddingModel
   provider.textEmbeddingModel = createEmbeddingModel
+  provider.imageModel = createImageModel
 
   return provider as OllamaProvider
 }

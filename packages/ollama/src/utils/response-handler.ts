@@ -27,9 +27,9 @@ export const createJsonStreamResponseHandler =
         .pipeThrough(new TextLineStream())
         .pipeThrough(
           new TransformStream<string, ParseResult<T>>({
-            transform(chunkText, controller) {
+            async transform(chunkText, controller) {
               controller.enqueue(
-                safeParseJSON({
+                await safeParseJSON({
                   schema: chunkSchema,
                   text: chunkText,
                 }),

@@ -1,7 +1,4 @@
-import {
-  experimental_createProviderRegistry as createProviderRegistry,
-  experimental_customProvider as customProvider,
-} from 'ai'
+import { createProviderRegistry, customProvider } from 'ai'
 import { ollama } from 'ollama-ai-provider'
 
 const myOllama = customProvider({

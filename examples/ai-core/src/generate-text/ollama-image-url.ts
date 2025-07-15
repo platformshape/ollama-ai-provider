@@ -7,7 +7,7 @@ import { buildProgram } from '../tools/command'
 
 async function main(model: Parameters<typeof ollama>[0]) {
   const result = await generateText({
-    maxTokens: 512,
+    maxOutputTokens: 512,
     messages: [
       {
         content: [

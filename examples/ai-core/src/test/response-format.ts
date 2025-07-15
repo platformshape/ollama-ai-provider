@@ -8,8 +8,6 @@ async function main(model: Parameters<typeof ollama>[0]) {
   const result = await ollama(model, {
     experimentalStreamTools: false,
   }).doStream({
-    inputFormat: 'prompt',
-    mode: { type: 'regular' },
     prompt: [
       {
         content: [
@@ -42,10 +40,9 @@ async function main(model: Parameters<typeof ollama>[0]) {
     }
 
     if (value.type === 'text-delta') {
-      process.stdout.write(value.textDelta)
+      process.stdout.write(value.delta)
     }
   }
-  console.log('WARNINGS:\n', JSON.stringify(result.warnings, null, 2))
 }
 
 buildProgram('llama3.1', main).catch(console.error)
