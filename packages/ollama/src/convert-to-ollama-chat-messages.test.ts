@@ -1,5 +1,5 @@
 import {
-  LanguageModelV1Prompt,
+  LanguageModelV2Prompt,
   UnsupportedFunctionalityError,
 } from '@ai-sdk/provider'
 import { describe, expect, it } from 'vitest'
@@ -39,9 +39,9 @@ describe('user messages', () => {
         content: [
           { text: 'Hello', type: 'text' },
           {
-            image: new Uint8Array([0, 1, 2, 3]),
-            mimeType: 'image/png',
-            type: 'image',
+            data: new Uint8Array([0, 1, 2, 3]),
+            mediaType: 'image/png',
+            type: 'file',
           },
         ],
         role: 'user',
@@ -70,10 +70,14 @@ describe('user messages', () => {
 
   it('should throw UnsupportedFunctionalityError for image URL', () => {
     // Arrange
-    const prompt: LanguageModelV1Prompt = [
+    const prompt: LanguageModelV2Prompt = [
       {
         content: [
-          { image: new URL('https://example.com/image.png'), type: 'image' },
+          {
+            data: new URL('https://example.com/image.png'),
+            mediaType: 'image/png',
+            type: 'file',
+          },
         ],
         role: 'user',
       },
